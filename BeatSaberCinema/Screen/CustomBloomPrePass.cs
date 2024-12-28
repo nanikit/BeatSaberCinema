@@ -19,7 +19,6 @@ namespace BeatSaberCinema
 
 		private Renderer _renderer = null!;
 		private Mesh _mesh = null!;
-		private static readonly int Alpha = Shader.PropertyToID("_Alpha");
 		private const int DOWNSAMPLE = 1;
 		private const float BLOOM_BOOST_BASE_FACTOR = 0.045f;
 		private float? _bloomIntensityConfigSetting;
@@ -47,7 +46,7 @@ namespace BeatSaberCinema
 			BSEvents.gameSceneLoaded += UpdateMesh;
 			BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoaded;
 
-			OnMenuSceneLoaded(null);
+			OnMenuSceneLoaded(null! /* unused param */);
 		}
 
 		public void UpdateMesh()

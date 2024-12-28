@@ -146,8 +146,13 @@ namespace BeatSaberCinema
 
 		private void GetMenuReferences()
 		{
-			_menuFloorLight = Resources.FindObjectsOfTypeAll<MaterialLightWithId>().FirstOrDefault(x => x.gameObject.name == "BasicMenuGround");
-			_menuFogRing = Resources.FindObjectsOfTypeAll<InstancedMaterialLightWithId>().FirstOrDefault(x => x.gameObject.name == "MenuFogRing");
+			var activeEnvironmentTransform = Resources.FindObjectsOfTypeAll<MenuEnvironmentManager>().FirstOrDefault()?
+				._data.FirstOrDefault(d => d.wrapper.activeInHierarchy)?
+				.wrapper.transform;
+
+			_menuFogRing = activeEnvironmentTransform?.Find("MenuFogRing")?.GetComponent<InstancedMaterialLightWithId>();
+			_menuFloorLight = activeEnvironmentTransform?.Find("BasicMenuGround")?.GetComponent<MaterialLightWithId>();
+
 			_menuReferencesSet = true;
 		}
 

@@ -27,7 +27,7 @@ namespace BeatSaberCinema
 		/// <summary>
 		/// Broadcasts SongCores DifficultyData every time the LevelDetailView is refreshed
 		/// </summary>
-		public static event Action<ExtraSongDataArgs>? DifficultySelected;
+		public static event Action<SongDataArgs>? DifficultySelected;
 
 		internal static void InvokeSceneTransitionEvents(VideoConfig? videoConfig)
 		{
@@ -66,9 +66,9 @@ namespace BeatSaberCinema
 			LevelSelected?.InvokeSafe(new LevelSelectedArgs(null, beatmapData, originalPath), nameof(LevelSelected));
 		}
 
-		internal static void SetExtraSongData(SongCore.Data.ExtraSongData? songData, SongCore.Data.ExtraSongData.DifficultyData? selectedDifficultyData)
+		internal static void SetExtraSongData(SongCore.Data.SongData? songData, SongCore.Data.SongData.DifficultyData? selectedDifficultyData)
 		{
-			DifficultySelected?.InvokeSafe(new ExtraSongDataArgs(songData, selectedDifficultyData), nameof(DifficultySelected));
+			DifficultySelected?.InvokeSafe(new SongDataArgs(songData, selectedDifficultyData), nameof(DifficultySelected));
 		}
 	}
 }

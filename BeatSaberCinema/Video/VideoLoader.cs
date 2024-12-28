@@ -35,47 +35,28 @@ namespace BeatSaberCinema
 		private static readonly ConcurrentDictionary<string, VideoConfig> BundledConfigs = new ConcurrentDictionary<string, VideoConfig>();
 
 		private static BeatmapLevelsModel? _beatmapLevelsModel;
-
-		public static BeatmapLevelsModel BeatmapLevelsModel
-		{
-			get
-			{
-				if (_beatmapLevelsModel == null)
-				{
-					_beatmapLevelsModel = Plugin.menuContainer.Resolve<BeatmapLevelsModel>();
-				}
-
-				return _beatmapLevelsModel;
-			}
-		}
 		private static BeatmapLevelsEntitlementModel? _beatmapLevelsEntitlementModel;
-		private static BeatmapLevelsEntitlementModel BeatmapLevelsEntitlementModel
-		{
-			get
-			{
-				if (_beatmapLevelsEntitlementModel == null)
-				{
-					_beatmapLevelsEntitlementModel = BeatmapLevelsModel._entitlements;
-				}
-
-				return _beatmapLevelsEntitlementModel;
-			}
-		}
-
-		private static AudioClipAsyncLoader AudioClipAsyncLoader
-		{
-			get
-			{
-				if (_audioClipAsyncLoader == null)
-				{
-					_audioClipAsyncLoader = Plugin.menuContainer.Resolve<AudioClipAsyncLoader>();
-				}
-
-				return _audioClipAsyncLoader;
-			}
-		}
-
 		private static AudioClipAsyncLoader? _audioClipAsyncLoader;
+		private static CustomLevelLoader? _customLevelLoader;
+
+		public static BeatmapLevelsModel BeatmapLevelsModel =>
+			_beatmapLevelsModel ??= Plugin.menuContainer.Resolve<BeatmapLevelsModel>();
+		private static BeatmapLevelsEntitlementModel BeatmapLevelsEntitlementModel =>
+			_beatmapLevelsEntitlementModel ??= BeatmapLevelsModel._entitlements;
+		private static AudioClipAsyncLoader AudioClipAsyncLoader =>
+			_audioClipAsyncLoader ??= Plugin.menuContainer.Resolve<AudioClipAsyncLoader>();
+		public static CustomLevelLoader CustomLevelLoader
+		{
+			get
+			{
+				if (_customLevelLoader == null)
+				{
+					_customLevelLoader = Resources.FindObjectsOfTypeAll<CustomLevelLoader>().First();
+				}
+				return _customLevelLoader;
+			}
+		}
+
 
 		public static void Init()
 		{
@@ -303,7 +284,7 @@ namespace BeatSaberCinema
 
 		private static async Task<AudioClip?> LoadAudioClipAsync(BeatmapLevel level)
 		{
-			var loaderTask = AudioClipAsyncLoader?.LoadPreview(level);
+			var loaderTask = AudioClipAsyncLoader.LoadPreview(level);
 			if (loaderTask == null)
 			{
 				Log.Error("AudioClipAsyncLoader.LoadPreview() failed");
@@ -377,13 +358,12 @@ namespace BeatSaberCinema
 
 			return videoConfig ?? GetConfigFromBundledConfigs(level);
 		}
-
-		[Obsolete("Obsolete")]
 		public static string GetLevelPath(BeatmapLevel level)
 		{
-			if (!level.hasPrecalculatedData)
+			if (!level.hasPrecalculatedData
+			    && CustomLevelLoader._loadedBeatmapSaveData.TryGetValue(level.levelID, out var levelData))
 			{
-				return Collections.GetCustomLevelPath(level.levelID);
+				return levelData.customLevelFolderInfo.folderPath;
 			}
 
 			var songName = level.songName.Trim();

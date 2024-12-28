@@ -12,6 +12,7 @@ namespace BeatSaberCinema.Patches
 	// ReSharper disable once InconsistentNaming
 	internal static class StandardLevelScenesTransitionSetupDataSOInit
 	{
+		[UsedImplicitly]
 		private static MethodInfo TargetMethod() => AccessTools.FirstMethod(typeof(StandardLevelScenesTransitionSetupDataSO),
 			m => m.Name == nameof(StandardLevelScenesTransitionSetupDataSO.Init) &&
 			     m.GetParameters().All(p => p.ParameterType != typeof(IBeatmapLevelData)));
@@ -85,9 +86,7 @@ namespace BeatSaberCinema.Patches
 				};
 
 				var environmentName = beatmapLevel.GetEnvironmentName(beatmapKey.beatmapCharacteristic, beatmapKey.difficulty);
-				// Kind of ugly way to get the EnvironmentsListModel but it's either that or changing both patches.
-				var customLevelLoader = (CustomLevelLoader)VideoLoader.BeatmapLevelsModel._customLevelLoader;
-				var mapEnvironmentInfoSo = customLevelLoader._environmentsListModel.GetEnvironmentInfoBySerializedNameSafe(environmentName);
+				var mapEnvironmentInfoSo = VideoLoader.CustomLevelLoader._environmentsListModel.GetEnvironmentInfoBySerializedNameSafe(environmentName);
 				if (overrideEnvironmentSettings is { overrideEnvironments: true })
 				{
 					var overrideEnvironmentInfo = overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(mapEnvironmentInfoSo.environmentType);
@@ -145,6 +144,7 @@ namespace BeatSaberCinema.Patches
 	// ReSharper disable once InconsistentNaming
 	internal static class MissionLevelScenesTransitionSetupDataSOInit
 	{
+		[UsedImplicitly]
 		private static MethodInfo TargetMethod() => AccessTools.FirstMethod(typeof(MissionLevelScenesTransitionSetupDataSO),
 			m => m.Name == nameof(MissionLevelScenesTransitionSetupDataSO.Init) &&
 			     m.GetParameters().All(p => p.ParameterType != typeof(IBeatmapLevelData)));

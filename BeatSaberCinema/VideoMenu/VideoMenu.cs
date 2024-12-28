@@ -76,8 +76,8 @@ namespace BeatSaberCinema
 
 		private BeatmapLevel? _currentLevel;
 		private bool _currentLevelIsPlaylistSong;
-		private ExtraSongData? _extraSongData;
-		private ExtraSongData.DifficultyData? _difficultyData;
+		private SongData? _songData;
+		private SongData.DifficultyData? _difficultyData;
 		private VideoConfig? _currentVideo;
 		private bool _videoMenuActive;
 		private int _selectedCell;
@@ -358,7 +358,7 @@ namespace BeatSaberCinema
 			switch (videoConfig.DownloadState)
 			{
 				case DownloadState.Downloaded:
-					if (videoConfig.IsWIPLevel && _difficultyData?.HasCinema() == false && _extraSongData?.HasCinemaInAnyDifficulty() == false)
+					if (videoConfig.IsWIPLevel && _difficultyData?.HasCinema() == false && _songData?.HasCinemaInAnyDifficulty() == false)
 					{
 						_levelDetailMenu.SetActive(true);
 						_levelDetailMenu.SetText("Please add Cinema as a suggestion", null, Color.red);
@@ -531,16 +531,10 @@ namespace BeatSaberCinema
 			PlaybackController.Instance.SetSelectedLevel(null, _currentVideo);
 		}
 
-		[Obsolete("This overload is depreciated, isPlaylistSong is determined automatically.", true)]
-		public void HandleDidSelectLevel(BeatmapLevel? level, bool isPlaylistSong = false)
-		{
-			HandleDidSelectLevel(level);
-		}
-
 		public void HandleDidSelectLevel(BeatmapLevel? level)
 		{
 			//These will be set a bit later by a Harmony patch. Clear them to not accidentally access outdated info.
-			_extraSongData = null;
+			_songData = null;
 			_difficultyData = null;
 
 			if (!Plugin.Enabled || (_currentLevel == level && _currentLevelIsPlaylistSong)) //Ignores the duplicate event that occurs when selecting a playlist song
@@ -595,10 +589,10 @@ namespace BeatSaberCinema
 			HandleDidSelectLevel(levelSelectedArgs.BeatmapLevel);
 		}
 
-		private void OnDifficultySelected(ExtraSongDataArgs extraSongDataArgs)
+		private void OnDifficultySelected(SongDataArgs songDataArgs)
 		{
-			_extraSongData = extraSongDataArgs.SongData;
-			_difficultyData = extraSongDataArgs.SelectedDifficultyData;
+			_songData = songDataArgs.SongData;
+			_difficultyData = songDataArgs.SelectedDifficultyData;
 			if (_currentVideo != null)
 			{
 				SetupLevelDetailView(_currentVideo);

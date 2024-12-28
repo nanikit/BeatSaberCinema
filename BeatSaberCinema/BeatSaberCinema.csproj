@@ -31,20 +31,20 @@
 			<HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-		<Reference Include="AdditionalContentModel.Interfaces" Publicize="true">
+		<Reference Include="AdditionalContentModel.Interfaces" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\AdditionalContentModel.Interfaces.dll</HintPath>
 		</Reference>
-        <Reference Include="BeatSaber.BeatmapEditor" Publicize="true">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.BeatmapEditor.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="BeatmapCore" Publicize="true">
+		<Reference Include="BeatmapCore" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-		<Reference Include="BeatmapEditor3D" Publicize="true">
-			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapEditor3D.dll</HintPath>
-			<Private>False</Private>
+		<Reference Include="BeatSaber.BeatmapEditor" Publicize="True">
+			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.BeatmapEditor.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="BeatSaber.GameSettings">
+			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.GameSettings.dll</HintPath>
+			<Private>false</Private>
 		</Reference>
 		<Reference Include="BeatSaber.Settings">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.Settings.dll</HintPath>
@@ -61,7 +61,7 @@
 		<Reference Include="BetterSongList">
 			<HintPath>$(BeatSaberDir)\Plugins\BetterSongList.dll</HintPath>
 		</Reference>
-		<Reference Include="BGLib.Appflow, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" Publicize="true">
+		<Reference Include="BGLib.Appflow" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.Appflow.dll</HintPath>
 		</Reference>
 		<Reference Include="BGLib.DotnetExtension">
@@ -72,11 +72,8 @@
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.SaveDataCore.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-		<Reference Include="BGLib.UnityExtension, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" Publicize="true">
+		<Reference Include="BGLib.UnityExtension" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
-		</Reference>
-		<Reference Include="BGNet, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" Publicize="true">
-			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
 		</Reference>
 		<Reference Include="BGNetCore">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNetCore.dll</HintPath>
@@ -88,38 +85,34 @@
 		<Reference Include="BSML">
 			<HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
 		</Reference>
-		<Reference Include="Colors, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+		<Reference Include="Colors">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Colors.dll</HintPath>
 		</Reference>
-		<Reference Include="DataModels">
+		<Reference Include="DataModels" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DataModels.dll</HintPath>
 			<Private>false</Private>
-			<Publicize>true</Publicize>
 		</Reference>
-		<Reference Include="GameplayCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" Publicize="true">
+		<Reference Include="GameplayCore">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\GameplayCore.dll</HintPath>
 		</Reference>
 		<Reference Include="Hive.Versioning">
 			<HintPath>$(BeatSaberDir)\Libs\Hive.Versioning.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-		<Reference Include="HMLib" Publicize="true">
+		<Reference Include="HMLib" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
 		</Reference>
-		<Reference Include="HMLibAttributes" Publicize="true">
-			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLibAttributes.dll</HintPath>
-		</Reference>
-		<Reference Include="HMRendering, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" Publicize="true">
+		<Reference Include="HMRendering" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
 		</Reference>
-		<Reference Include="HMUI" Publicize="true">
+		<Reference Include="HMUI" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
 		</Reference>
 		<Reference Include="IPA.Loader">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-		<Reference Include="Main" Publicize="true">
+		<Reference Include="Main" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
@@ -136,7 +129,7 @@
 		<Reference Include="Newtonsoft.Json">
 			<HintPath>$(BeatSaberDir)\IPA\Libs\Newtonsoft.Json.dll</HintPath>
 		</Reference>
-		<Reference Include="Rendering, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" Publicize="true">
+		<Reference Include="Rendering" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Rendering.dll</HintPath>
 		</Reference>
 		<Reference Include="SongCore">
@@ -192,7 +185,7 @@
 		<Reference Include="UnityEngine.VRModule">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.VRModule.dll</HintPath>
 		</Reference>
-		<Reference Include="Zenject" Publicize="true">
+		<Reference Include="Zenject" Publicize="True">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject.dll</HintPath>
 		</Reference>
 	</ItemGroup>

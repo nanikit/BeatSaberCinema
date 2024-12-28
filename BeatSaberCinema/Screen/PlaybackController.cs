@@ -572,15 +572,15 @@ namespace BeatSaberCinema
 			}
 		}
 
-		private void DifficultySelected(ExtraSongDataArgs extraSongDataArgs)
+		private void DifficultySelected(SongDataArgs songDataArgs)
 		{
 			if (VideoConfig == null)
 			{
 				return;
 			}
 
-			var difficultyData = extraSongDataArgs.SelectedDifficultyData;
-			var songData = extraSongDataArgs.SongData;
+			var difficultyData = songDataArgs.SelectedDifficultyData;
+			var songData = songDataArgs.SongData;
 
 			//If there is any difficulty that has a Cinema suggestion but the current one doesn't, disable playback. The current difficulty most likely has the suggestion missing on purpose.
 			//If there are no difficulties that have the suggestion set, play the video. It might be a video added by the user.
