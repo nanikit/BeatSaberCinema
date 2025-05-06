@@ -22,7 +22,19 @@ namespace BeatSaberCinema
 {
 	public class VideoMenu
 	{
-		[UIObject("root-object")] private readonly GameObject _root = null!;
+		private GameObject __root = null!;
+
+		[UIObject("root-object")]
+		private GameObject _root
+		{
+			get => __root;
+			set
+			{
+				__root = value;
+				CreateStatusListener();
+			}
+		}
+
 		[UIComponent("no-video-bg")] private readonly RectTransform _noVideoViewRect = null!;
 		[UIComponent("video-details")] private readonly RectTransform _videoDetailsViewRect = null!;
 		[UIComponent("video-search-results")] private readonly RectTransform _videoSearchResultsViewRect = null!;
@@ -109,7 +121,6 @@ namespace BeatSaberCinema
 
 			_levelDetailMenu = new LevelDetailViewController();
 			_levelDetailMenu.ButtonPressedAction += OnDeleteVideoAction;
-			CreateStatusListener();
 			_deleteButton.transform.localScale *= 0.5f;
 
 			_searchKeyboard.ClearOnOpen = false;
@@ -1005,14 +1016,14 @@ namespace BeatSaberCinema
 		{
 			var handler = DidEnable;
 
-			handler.Invoke(this, EventArgs.Empty);
+			handler?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnDisable()
 		{
 			var handler = DidDisable;
 
-			handler.Invoke(this, EventArgs.Empty);
+			handler?.Invoke(this, EventArgs.Empty);
 		}
 	}
 }
