@@ -15,7 +15,6 @@ namespace BeatSaberCinema
 		private AsyncGPUReadbackRequest? _readbackRequest;
 		private readonly Stopwatch _readbackRequestStopwatch = new Stopwatch();
 
-		private CustomVideoPlayer _customVideoPlayer = null!;
 		private GameObject _lightGameObject = null!;
 		private DirectionalLight _light = null!;
 		private List<RenderTexture> _downscaleTextures = null!;
@@ -50,15 +49,15 @@ namespace BeatSaberCinema
 
 		private void OnEnable()
 		{
-			_customVideoPlayer = PlaybackController.Instance.VideoPlayer;
+			var player = PlaybackController.Instance.VideoPlayer;
 			if (_lightGameObject == null)
 			{
-				CreateLight();
+				_lightGameObject = CreateLight();
 			}
 
-			_customVideoPlayer.Player.frameReady += ProcessFrame;
-			_customVideoPlayer.stopped += VideoStopped;
-			_customVideoPlayer.FadeController.EasingUpdate += OnFadeUpdate;
+			player.Player.frameReady += ProcessFrame;
+			player.stopped += VideoStopped;
+			player.FadeController.EasingUpdate += OnFadeUpdate;
 			Events.LevelSelected += OnLevelSelected;
 			BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
 			BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
@@ -66,9 +65,10 @@ namespace BeatSaberCinema
 
 		private void OnDisable()
 		{
-			_customVideoPlayer.Player.frameReady -= ProcessFrame;
-			_customVideoPlayer.stopped -= VideoStopped;
-			_customVideoPlayer.FadeController.EasingUpdate -= OnFadeUpdate;
+			var player = PlaybackController.Instance.VideoPlayer;
+			player.Player.frameReady -= ProcessFrame;
+			player.stopped -= VideoStopped;
+			player.FadeController.EasingUpdate -= OnFadeUpdate;
 			Events.LevelSelected -= OnLevelSelected;
 			BSEvents.menuSceneLoaded -= OnMenuSceneLoaded;
 			BSEvents.lateMenuSceneLoadedFresh -= OnMenuSceneLoadedFresh;
@@ -142,6 +142,11 @@ namespace BeatSaberCinema
 
 		internal void Enable()
 		{
+			if (_lightGameObject == null)
+			{
+				_lightGameObject = CreateLight();
+			}
+
 			_lightGameObject.SetActive(true);
 		}
 
@@ -157,20 +162,23 @@ namespace BeatSaberCinema
 			UpdateColor(_color);
 		}
 
-		private void CreateLight()
+		private GameObject CreateLight()
 		{
-			var screen = _customVideoPlayer.screenController.Screens[0];
-			_lightGameObject = new GameObject("CinemaDirectionalLight");
-			_lightGameObject.transform.parent = screen.transform;
-			_lightGameObject.transform.forward = -screen.transform.forward;
-			var euler = _lightGameObject.transform.eulerAngles;
+			var player = PlaybackController.Instance.VideoPlayer;
+			var screen = player.screenController.Screens[0];
+			var lightGameObject = new GameObject("CinemaDirectionalLight");
+			lightGameObject.transform.parent = screen.transform;
+			lightGameObject.transform.forward = -screen.transform.forward;
+			var euler = lightGameObject.transform.eulerAngles;
 			euler.x = LIGHT_X_ROTATION;
-			_lightGameObject.transform.eulerAngles = euler;
+			lightGameObject.transform.eulerAngles = euler;
 
-			_light = _lightGameObject.AddComponent<DirectionalLight>();
+			_light = lightGameObject.AddComponent<DirectionalLight>();
 			_light.radius = LIGHT_RADIUS;
 			_light.intensity = DIRECTIONAL_LIGHT_INTENSITY_MENU;
 			_light.color = Color.black;
+
+			return lightGameObject;
 		}
 
 		private void VideoStopped()
@@ -206,8 +214,9 @@ namespace BeatSaberCinema
 
 		private void UpdateColor(Color color)
 		{
+			var player = PlaybackController.Instance.VideoPlayer;
 			_color = color;
-			_light.color = _color * _customVideoPlayer.ScreenColor;
+			_light.color = _color * player.ScreenColor;
 
 			if (Util.GetEnvironmentName() != "MainMenu")
 			{
@@ -215,7 +224,7 @@ namespace BeatSaberCinema
 			}
 
 			//Darken the base menu lighting
-			var baseColor = MenuColorPatch.BaseColor * (Color.white - (_customVideoPlayer.ScreenColor * MENU_DARKENING_INTENSITY));
+			var baseColor = MenuColorPatch.BaseColor * (Color.white - (player.ScreenColor * MENU_DARKENING_INTENSITY));
 			baseColor.a = 1;
 
 			if (_menuFloorLight != null)

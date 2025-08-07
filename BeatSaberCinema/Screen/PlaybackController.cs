@@ -33,6 +33,8 @@ namespace BeatSaberCinema
 		private DateTime _audioSourceStartTime;
 		private float _offsetAfterPrepare;
 		private Stopwatch? _playbackDelayStopwatch;
+		private GameObject? _videoPlayerGameObject;
+		private VideoConfig? _lastErrorVideoConfig;
 
 		public VideoConfig? VideoConfig { get; private set; }
 
@@ -67,11 +69,9 @@ namespace BeatSaberCinema
 				return;
 			}
 			Instance = this;
+			ResetPlayer();
 
-			VideoPlayer = gameObject.AddComponent<CustomVideoPlayer>();
 			LightController = gameObject.AddComponent<LightController>();
-			VideoPlayer.Player.frameReady += FrameReady;
-			VideoPlayer.Player.sendFrameReadyEvents = true;
 			BSEvents.gameSceneActive += GameSceneActive;
 			BSEvents.gameSceneLoaded += GameSceneLoaded;
 			BSEvents.songPaused += PauseVideo;
@@ -79,7 +79,6 @@ namespace BeatSaberCinema
 			BSEvents.lateMenuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 			BSEvents.menuSceneLoaded += OnMenuSceneLoaded;
 			VideoLoader.ConfigChanged += OnConfigChanged;
-			VideoPlayer.Player.prepareCompleted += OnPrepareComplete;
 			Events.DifficultySelected += DifficultySelected;
 			DontDestroyOnLoad(gameObject);
 
@@ -1131,6 +1130,53 @@ namespace BeatSaberCinema
 			{
 				Log.Debug($"Not playing song preview, because delay was too long. Remaining preview time: {_previewTimeRemaining}");
 			}
+		}
+
+		private void RetryIfNotSameVideo()
+		{
+			var isRetryable = _lastErrorVideoConfig != VideoConfig;
+			if (isRetryable)
+			{
+				_lastErrorVideoConfig = VideoConfig;
+				if (VideoConfig != null)
+				{
+					VideoConfig.ErrorMessage = null;
+				}
+				ResetPlayer();
+
+				return;
+			}
+
+			if (_lastErrorVideoConfig != null)
+			{
+				VideoMenu.Instance?.SetupLevelDetailView(_lastErrorVideoConfig);
+				return;
+			}
+		}
+
+		private void ResetPlayer()
+		{
+			Destroy(_videoPlayerGameObject);
+
+			var playerGameObject = new GameObject("CinemaVideoPlayer");
+			VideoPlayer = CreateVideoPlayer(playerGameObject);
+			DontDestroyOnLoad(playerGameObject);
+			_videoPlayerGameObject = playerGameObject;
+
+			if (VideoConfig != null)
+			{
+				PrepareVideo(VideoConfig);
+			}
+		}
+
+		private CustomVideoPlayer CreateVideoPlayer(GameObject gameObject)
+		{
+			var videoPlayer = gameObject.AddComponent<CustomVideoPlayer>();
+			videoPlayer.Player.frameReady += FrameReady;
+			videoPlayer.Player.sendFrameReadyEvents = true;
+			videoPlayer.Player.prepareCompleted += OnPrepareComplete;
+			videoPlayer.OnError += RetryIfNotSameVideo;
+			return videoPlayer;
 		}
 	}
 }

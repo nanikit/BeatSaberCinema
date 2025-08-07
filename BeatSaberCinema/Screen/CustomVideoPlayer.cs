@@ -9,13 +9,13 @@ using UnityEngine.Video;
 
 namespace BeatSaberCinema
 {
-	public class CustomVideoPlayer: MonoBehaviour
+	public class CustomVideoPlayer : MonoBehaviour
 	{
 		//Initialized by Awake()
 		[NonSerialized] public VideoPlayer Player = null!;
 		private AudioSource _videoPlayerAudioSource = null!;
 		internal ScreenController screenController = null!;
-		private Renderer _screenRenderer  = null!;
+		private Renderer _screenRenderer = null!;
 		private RenderTexture _renderTexture = null!;
 		internal EasingController FadeController = null!;
 
@@ -38,6 +38,8 @@ namespace BeatSaberCinema
 		private bool _waitingForFadeOut;
 
 		internal event Action? stopped;
+		internal event Action OnError = delegate { };
+
 		public bool VideoEnded { get; private set; }
 
 		public Color ScreenColor
@@ -78,27 +80,10 @@ namespace BeatSaberCinema
 		{
 			CreateScreen();
 			_screenRenderer = screenController.GetRenderer();
-			_screenRenderer.material = new Material(GetShader()) {color = _screenColorOff};
+			_screenRenderer.material = new Material(GetShader()) { color = _screenColorOff };
 			_screenRenderer.material.enableInstancing = true;
 
-			Player = gameObject.AddComponent<VideoPlayer>();
-			Player.source = VideoSource.Url;
-			Player.renderMode = VideoRenderMode.RenderTexture;
-			_renderTexture = screenController.CreateRenderTexture();
-			_renderTexture.wrapMode = TextureWrapMode.Mirror;
-			Player.targetTexture = _renderTexture;
-
-			Player.playOnAwake = false;
-			Player.waitForFirstFrame = true;
-			Player.errorReceived += VideoPlayerErrorReceived;
-			Player.prepareCompleted += VideoPlayerPrepareComplete;
-			Player.started += VideoPlayerStarted;
-			Player.loopPointReached += VideoPlayerFinished;
-
-			//TODO PanStereo does not work as expected with this AudioSource. Panning fully to one side is still slightly audible in the other.
-			_videoPlayerAudioSource = gameObject.AddComponent<AudioSource>();
-			Player.audioOutputMode = VideoAudioOutputMode.AudioSource;
-			Player.SetTargetAudioSource(0, _videoPlayerAudioSource);
+			ResetInnerPlayer();
 			Mute();
 			screenController.SetScreensActive(false);
 			LoopVideo(false);
@@ -225,7 +210,7 @@ namespace BeatSaberCinema
 		public void SetDefaultMenuPlacement(float? width = null)
 		{
 			var placement = Placement.MenuPlacement;
-			placement.Width = width ?? placement.Height * (21f/9f);
+			placement.Width = width ?? placement.Height * (21f / 9f);
 			SetPlacement(placement);
 		}
 
@@ -242,7 +227,7 @@ namespace BeatSaberCinema
 			//So, we wait before the player renders its first frame and then set the color, making the switch invisible.
 			FadeIn();
 			_firstFrameStopwatch.Stop();
-			Log.Debug("Delay from Play() to first frame: "+_firstFrameStopwatch.ElapsedMilliseconds+" ms");
+			Log.Debug("Delay from Play() to first frame: " + _firstFrameStopwatch.ElapsedMilliseconds + " ms");
 			_firstFrameStopwatch.Reset();
 			screenController.SetAspectRatio(GetVideoAspectRatio());
 			Player.frameReady -= FirstFrameReady;
@@ -432,7 +417,7 @@ namespace BeatSaberCinema
 			}
 		}
 
-		private static void VideoPlayerErrorReceived(VideoPlayer source, string message)
+		private void VideoPlayerErrorReceived(VideoPlayer source, string message)
 		{
 			if (message == "Can't play movie []")
 			{
@@ -442,6 +427,7 @@ namespace BeatSaberCinema
 
 			Log.Error("Video player error: " + message);
 			PlaybackController.Instance.StopPlayback();
+
 			var config = PlaybackController.Instance.VideoConfig;
 			if (config == null)
 			{
@@ -449,11 +435,12 @@ namespace BeatSaberCinema
 			}
 
 			config.UpdateDownloadState();
-			config.ErrorMessage =  "Cinema playback error.";
+			config.ErrorMessage = "Cinema playback error.";
 			if (message.Contains("Unexpected error code (10)") && SystemInfo.graphicsDeviceVendor == "NVIDIA")
 			{
 				config.ErrorMessage += " Try disabling NVIDIA Fast Sync.";
-			} else if (message.Contains("It seems that the Microsoft Media Foundation is not installed on this machine"))
+			}
+			else if (message.Contains("It seems that the Microsoft Media Foundation is not installed on this machine"))
 			{
 				config.ErrorMessage += " Install Microsoft Media Foundation.";
 			}
@@ -462,7 +449,7 @@ namespace BeatSaberCinema
 				config.ErrorMessage += " See logs for details.";
 			}
 
-			VideoMenu.Instance?.SetupLevelDetailView(config);
+			OnError.Invoke();
 		}
 
 		public float GetVideoAspectRatio()
@@ -495,6 +482,41 @@ namespace BeatSaberCinema
 			{
 				screenController.SetSoftParent(parent);
 			}
+		}
+
+		private void ResetInnerPlayer()
+		{
+			if (Player != null)
+			{
+				Destroy(Player.gameObject);
+				PlaybackController.Create();
+				return;
+			}
+
+			Player = gameObject.AddComponent<VideoPlayer>();
+			Player.source = VideoSource.Url;
+			Player.renderMode = VideoRenderMode.RenderTexture;
+			if (_renderTexture == null)
+			{
+				_renderTexture = screenController.CreateRenderTexture();
+				_renderTexture.wrapMode = TextureWrapMode.Mirror;
+			}
+			Player.targetTexture = _renderTexture;
+
+			Player.playOnAwake = false;
+			Player.waitForFirstFrame = true;
+			Player.errorReceived += VideoPlayerErrorReceived;
+			Player.prepareCompleted += VideoPlayerPrepareComplete;
+			Player.started += VideoPlayerStarted;
+			Player.loopPointReached += VideoPlayerFinished;
+
+			//TODO PanStereo does not work as expected with this AudioSource. Panning fully to one side is still slightly audible in the other.
+			if (_videoPlayerAudioSource == null)
+			{
+				_videoPlayerAudioSource = gameObject.AddComponent<AudioSource>();
+			}
+			Player.audioOutputMode = VideoAudioOutputMode.AudioSource;
+			Player.SetTargetAudioSource(0, _videoPlayerAudioSource);
 		}
 	}
 }
