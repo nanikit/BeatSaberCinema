@@ -1132,9 +1132,19 @@ namespace BeatSaberCinema
 			}
 		}
 
-		private void RetryIfNotSameVideo()
+		private void RetryIfNotSameVideo(string message)
 		{
+			var songMayBeDeleted = message.Contains("VideoPlayer cannot play url");
 			var isRetryable = _lastErrorVideoConfig != VideoConfig;
+			if (songMayBeDeleted && isRetryable)
+			{
+				Log.Info($"Song may be deleted, retry by error: {message}");
+			}
+			else
+			{
+				Log.Error($"Video player error: {message}");
+			}
+
 			if (isRetryable)
 			{
 				_lastErrorVideoConfig = VideoConfig;
@@ -1147,11 +1157,32 @@ namespace BeatSaberCinema
 				return;
 			}
 
-			if (_lastErrorVideoConfig != null)
+			StopPlayback();
+
+			if (VideoConfig != null)
 			{
-				VideoMenu.Instance?.SetupLevelDetailView(_lastErrorVideoConfig);
-				return;
+				DisplayError(message, VideoConfig);
 			}
+		}
+
+		private void DisplayError(string message, VideoConfig config)
+		{
+			config.UpdateDownloadState();
+			config.ErrorMessage = "Cinema playback error.";
+			if (message.Contains("Unexpected error code (10)") && SystemInfo.graphicsDeviceVendor == "NVIDIA")
+			{
+				config.ErrorMessage += " Try disabling NVIDIA Fast Sync.";
+			}
+			else if (message.Contains("It seems that the Microsoft Media Foundation is not installed on this machine"))
+			{
+				config.ErrorMessage += " Install Microsoft Media Foundation.";
+			}
+			else
+			{
+				config.ErrorMessage += " See logs for details.";
+			}
+
+			VideoMenu.Instance?.SetupLevelDetailView(config);
 		}
 
 		private void ResetPlayer()

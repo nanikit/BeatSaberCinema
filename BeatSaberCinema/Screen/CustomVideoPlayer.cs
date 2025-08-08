@@ -38,7 +38,7 @@ namespace BeatSaberCinema
 		private bool _waitingForFadeOut;
 
 		internal event Action? stopped;
-		internal event Action OnError = delegate { };
+		internal event Action<string> OnError = delegate { };
 
 		public bool VideoEnded { get; private set; }
 
@@ -425,31 +425,7 @@ namespace BeatSaberCinema
 				return;
 			}
 
-			Log.Error("Video player error: " + message);
-			PlaybackController.Instance.StopPlayback();
-
-			var config = PlaybackController.Instance.VideoConfig;
-			if (config == null)
-			{
-				return;
-			}
-
-			config.UpdateDownloadState();
-			config.ErrorMessage = "Cinema playback error.";
-			if (message.Contains("Unexpected error code (10)") && SystemInfo.graphicsDeviceVendor == "NVIDIA")
-			{
-				config.ErrorMessage += " Try disabling NVIDIA Fast Sync.";
-			}
-			else if (message.Contains("It seems that the Microsoft Media Foundation is not installed on this machine"))
-			{
-				config.ErrorMessage += " Install Microsoft Media Foundation.";
-			}
-			else
-			{
-				config.ErrorMessage += " See logs for details.";
-			}
-
-			OnError.Invoke();
+			OnError.Invoke(message);
 		}
 
 		public float GetVideoAspectRatio()
