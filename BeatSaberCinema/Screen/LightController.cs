@@ -50,10 +50,6 @@ namespace BeatSaberCinema
 		private void OnEnable()
 		{
 			var player = PlaybackController.Instance.VideoPlayer;
-			if (_lightGameObject == null)
-			{
-				_lightGameObject = CreateLight();
-			}
 
 			player.Player.frameReady += ProcessFrame;
 			player.stopped += VideoStopped;
@@ -95,37 +91,40 @@ namespace BeatSaberCinema
 
 		internal void OnGameSceneLoaded()
 		{
-			var euler = _lightGameObject.transform.eulerAngles;
+			var lightObject = GetOrCreateLight();
+			var euler = lightObject.transform.eulerAngles;
 			euler.x = LIGHT_X_ROTATION;
-			_light.intensity = DIRECTIONAL_LIGHT_INTENSITY_GAMEPLAY;
+			var light = GetOrAddDirectionalLight();
+			light.intensity = DIRECTIONAL_LIGHT_INTENSITY_GAMEPLAY;
 
 			switch (Util.GetEnvironmentName())
 			{
 				case "BillieEnvironment":
 					//Tone down lighting on this env a bit, since clouds get pretty bright
-					_light.intensity = 1.2f;
+					light.intensity = 1.2f;
 					euler.x = 42;
 					break;
 				case "BTSEnvironment":
 					//Same as with Billie, clouds are too bright
-					_light.intensity = 1.6f;
+					light.intensity = 1.6f;
 					euler.x = 55;
 					break;
 				case "LizzoEnvironment":
 					//Background objects behind player too bright
-					_light.intensity = 1f;
+					light.intensity = 1f;
 					euler.x = 42;
 					break;
 			}
-			_lightGameObject.transform.eulerAngles = euler;
+			lightObject.transform.eulerAngles = euler;
 		}
 
 		private void OnMenuSceneLoaded()
 		{
-			var euler = _lightGameObject.transform.eulerAngles;
+			var lightObject = GetOrCreateLight();
+			var euler = lightObject.transform.eulerAngles;
 			euler.x = LIGHT_X_ROTATION;
-			_lightGameObject.transform.eulerAngles = euler;
-			_light.intensity = DIRECTIONAL_LIGHT_INTENSITY_MENU;
+			lightObject.transform.eulerAngles = euler;
+			GetOrAddDirectionalLight().intensity = DIRECTIONAL_LIGHT_INTENSITY_MENU;
 		}
 
 		private void OnMenuSceneLoadedFresh(ScenesTransitionSetupDataSO scenesTransitionSetupDataSo)
@@ -142,12 +141,7 @@ namespace BeatSaberCinema
 
 		internal void Enable()
 		{
-			if (_lightGameObject == null)
-			{
-				_lightGameObject = CreateLight();
-			}
-
-			_lightGameObject.SetActive(true);
+			GetOrCreateLight().SetActive(true);
 		}
 
 		private void GetMenuReferences()
@@ -162,6 +156,16 @@ namespace BeatSaberCinema
 			UpdateColor(_color);
 		}
 
+		private GameObject GetOrCreateLight()
+		{
+			if (_lightGameObject == null)
+			{
+				_lightGameObject = CreateLight();
+			}
+
+			return _lightGameObject;
+		}
+
 		private GameObject CreateLight()
 		{
 			var player = PlaybackController.Instance.VideoPlayer;
@@ -173,12 +177,26 @@ namespace BeatSaberCinema
 			euler.x = LIGHT_X_ROTATION;
 			lightGameObject.transform.eulerAngles = euler;
 
-			_light = lightGameObject.AddComponent<DirectionalLight>();
-			_light.radius = LIGHT_RADIUS;
-			_light.intensity = DIRECTIONAL_LIGHT_INTENSITY_MENU;
-			_light.color = Color.black;
-
 			return lightGameObject;
+		}
+
+		private DirectionalLight GetOrAddDirectionalLight()
+		{
+			if (_light == null)
+			{
+				_light = AddDirectionalLight();
+			}
+
+			return _light;
+		}
+
+		private DirectionalLight AddDirectionalLight()
+		{
+			var light = GetOrCreateLight().AddComponent<DirectionalLight>();
+			light.radius = LIGHT_RADIUS;
+			light.intensity = DIRECTIONAL_LIGHT_INTENSITY_MENU;
+			light.color = Color.black;
+			return light;
 		}
 
 		private void VideoStopped()
@@ -216,7 +234,8 @@ namespace BeatSaberCinema
 		{
 			var player = PlaybackController.Instance.VideoPlayer;
 			_color = color;
-			_light.color = _color * player.ScreenColor;
+			var light = GetOrAddDirectionalLight();
+			light.color = _color * player.ScreenColor;
 
 			if (Util.GetEnvironmentName() != "MainMenu")
 			{
@@ -224,19 +243,19 @@ namespace BeatSaberCinema
 			}
 
 			//Darken the base menu lighting
-			var baseColor = MenuColorPatch.BaseColor * (Color.white - (player.ScreenColor * MENU_DARKENING_INTENSITY));
+			var baseColor = MenuColorPatch.BaseColor * (Color.white - player.ScreenColor * MENU_DARKENING_INTENSITY);
 			baseColor.a = 1;
 
 			if (_menuFloorLight != null)
 			{
-				var colors = new[] { baseColor, (_light.color * MENU_FLOOR_INTENSITY) };
+				var colors = new[] { baseColor, light.color * MENU_FLOOR_INTENSITY };
 				var combinedColor = AddColors(colors);
 				_menuFloorLight.ColorWasSet(combinedColor);
 			}
 
 			if (_menuFogRing != null)
 			{
-				var colors = new[] { baseColor, (_light.color * MENU_FOG_INTENSITY) };
+				var colors = new[] { baseColor, light.color * MENU_FOG_INTENSITY };
 				var combinedColor = AddColors(colors);
 				_menuFogRing.ColorWasSet(combinedColor);
 			}
