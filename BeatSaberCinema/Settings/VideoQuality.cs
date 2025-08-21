@@ -7,12 +7,13 @@ namespace BeatSaberCinema
 {
 	public static class VideoQuality
 	{
-		public enum Mode {
+		public enum Mode
+		{
 			/*Q2160P = 2160,
 			Q1440P = 1440,*/
 			Q1080P = 1080,
-			Q720P  = 720,
-			Q480P  = 480
+			Q720P = 720,
+			Q480P = 480
 		}
 
 		public static string ToName(Mode mode)
@@ -25,7 +26,8 @@ namespace BeatSaberCinema
 			string? qualityString;
 			if (config.videoUrl == null || config.videoUrl.StartsWith("https://www.youtube.com/watch"))
 			{
-				qualityString = $"bestvideo[height<={(int) quality}][vcodec*=avc1]+bestaudio[acodec*=mp4]";
+				string videoExpression = $"bestvideo[height<={(int) quality}][vcodec*=avc1]";
+				qualityString = $"{videoExpression}+bestaudio[acodec*=mp4a]/{videoExpression}+bestaudio[ext*=mp4]";
 			}
 			else if (config.videoUrl.StartsWith("https://vimeo.com/"))
 			{
@@ -68,7 +70,7 @@ namespace BeatSaberCinema
 		{
 			var enumArray = Enum.GetValues(typeof(Mode));
 			var enumArrayFormatted = new object[enumArray.Length];
-			for (var i=0; i<enumArray.Length; i++)
+			for (var i = 0; i < enumArray.Length; i++)
 			{
 				enumArrayFormatted[i] = ToName((Mode) enumArray.GetValue(i));
 			}
