@@ -62,7 +62,7 @@ namespace BeatSaberCinema
 				return videoConfig;
 			}
 
-			Log.Error($"No config exists for {playlistSong.Name}:");
+			Log.Debug($"No playlist config exists for {playlistSong.Name}.");
 			return null;
 		}
 	}
